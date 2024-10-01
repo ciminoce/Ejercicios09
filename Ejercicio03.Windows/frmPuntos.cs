@@ -5,8 +5,8 @@ namespace Ejercicio03.Windows
 {
     public partial class frmPuntos : Form
     {
-        private Repositorio repositorio;
-        private List<Punto> listaPuntos;
+        private readonly Repositorio repositorio;
+        private List<Punto>? listaPuntos;
         private int cantidad;
         public frmPuntos()
         {
@@ -21,13 +21,7 @@ namespace Ejercicio03.Windows
 
         private void frmPuntos_Load(object sender, EventArgs e)
         {
-            cantidad = repositorio.GetCantidad();
-            if (cantidad > 0)
-            {
-                listaPuntos = repositorio.GetLista();
-                MostrarDatosEnGrilla();
-                ActualizarCantidadRegistros();
-            }
+            RecargarGrilla();
         }
 
         private void ActualizarCantidadRegistros()
@@ -38,7 +32,7 @@ namespace Ejercicio03.Windows
         private void MostrarDatosEnGrilla()
         {
             dgvDatos.Rows.Clear();
-            foreach (var item in listaPuntos)
+            foreach (var item in listaPuntos!)
             {
                 var r = ConstruirFila(dgvDatos);
                 SetearFila(r, item);
@@ -72,10 +66,10 @@ namespace Ejercicio03.Windows
             frmPuntosAE frm = new frmPuntosAE() { Text = "Agregar Punto" };
             DialogResult dr = frm.ShowDialog(this);
             if (dr == DialogResult.Cancel) { return; }
-            Punto pIngresado = frm.GetPunto();
-            repositorio.Agregar(pIngresado);
+            Punto? pIngresado = frm.GetPunto();
+            repositorio.Agregar(pIngresado!);
             var r = ConstruirFila(dgvDatos);
-            SetearFila(r, pIngresado);
+            SetearFila(r, pIngresado!);
             AgregarFila(r, dgvDatos);
             MessageBox.Show("Registro agregado!!!",
                 "Mensaje", MessageBoxButtons.OK,
@@ -86,12 +80,12 @@ namespace Ejercicio03.Windows
 
         private void tsbBorrar_Click(object sender, EventArgs e)
         {
-            if (dgvDatos.SelectedRows.Count==0)
+            if (dgvDatos.SelectedRows.Count == 0)
             {
                 return;
             }
             var r = dgvDatos.SelectedRows[0];
-            Punto pBorrar =(Punto) r.Tag!;
+            Punto pBorrar = (Punto)r.Tag!;
             DialogResult dr = MessageBox.Show($"¿Desea borrar el punto {pBorrar.ToString()}?",
                 "Confirmar",
                 MessageBoxButtons.YesNo,
@@ -105,6 +99,55 @@ namespace Ejercicio03.Windows
                 MessageBoxIcon.Information);
             cantidad = repositorio.GetCantidad();
             ActualizarCantidadRegistros();
+
+        }
+
+        private void tsbEditar_Click(object sender, EventArgs e)
+        {
+            if (dgvDatos.SelectedRows.Count == 0)
+            {
+                return;
+            }
+            var r = dgvDatos.SelectedRows[0];
+            Punto pEditar = (Punto)r.Tag!;
+            frmPuntosAE frm = new frmPuntosAE() { Text = "Editar Punto" };
+            frm.SetPunto(pEditar);
+            DialogResult dr = frm.ShowDialog(this);
+            if (dr == DialogResult.Cancel) { return; }
+            pEditar = frm.GetPunto()!;
+            SetearFila(r, pEditar);
+            MessageBox.Show("Registro editado!!!",
+                "Mensaje", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+        }
+
+        private void tsbFiltrar_Click(object sender, EventArgs e)
+        {
+            frmFiltro frm = new frmFiltro() { Text = "Seleccionar Cuadrante" };
+            DialogResult dr = frm.ShowDialog(this);
+            if (dr == DialogResult.Cancel) { return; }
+            Cuadrante cuadranteFiltro = frm.GetCuadrante();
+            listaPuntos = repositorio.Filtrar(cuadranteFiltro);
+            MostrarDatosEnGrilla();
+            cantidad = repositorio.GetCantidad(cuadranteFiltro);
+            ActualizarCantidadRegistros();
+        }
+
+        private void tsbActualizar_Click(object sender, EventArgs e)
+        {
+            RecargarGrilla();
+        }
+
+        private void RecargarGrilla()
+        {
+            cantidad = repositorio.GetCantidad();
+            if (cantidad > 0)
+            {
+                listaPuntos = repositorio.GetLista();
+                MostrarDatosEnGrilla();
+                ActualizarCantidadRegistros();
+            }
 
         }
     }

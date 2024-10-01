@@ -30,11 +30,18 @@ namespace Ejercicio03.Datos
         {
             puntos.Remove(punto);
         }
-        public int GetCantidad()=>puntos.Count;
+        public int GetCantidad(Cuadrante? cuadrante=null){
+            return cuadrante is null ? puntos.Count : puntos.Count(p => p.GetCuadrante() == cuadrante);
+        }
         public List<Punto> GetLista()=> puntos;
         public bool EstaRepetido(int x, int y)
         {
             return puntos.Any(p=>p.X==x && p.Y==y);
+        }
+
+        public List<Punto>? Filtrar(Cuadrante cuadranteFiltro)
+        {
+            return puntos.Where(p=>p.GetCuadrante()==cuadranteFiltro).ToList();
         }
     }
 }

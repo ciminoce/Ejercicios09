@@ -1,6 +1,5 @@
 ﻿using Ejercicio03.Datos;
 using Ejercicio03.Entidades;
-using System.Runtime.CompilerServices;
 
 namespace Ejercicio03.Windows
 {
@@ -11,12 +10,25 @@ namespace Ejercicio03.Windows
         public frmPuntosAE()
         {
             InitializeComponent();
-            repositorio= new Repositorio();
+            repositorio = new Repositorio();
         }
-
-        public Punto GetPunto()
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if(p is not null)
+            {
+                txtX.Text=p.X.ToString();
+                txtY.Text=p.Y.ToString();
+            }
+        }
+        public Punto? GetPunto()
         {
             return p;
+        }
+
+        public void SetPunto(Punto pEditar)
+        {
+            p = pEditar;
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
@@ -28,7 +40,11 @@ namespace Ejercicio03.Windows
         {
             if (ValidarDatos())
             {
-                p = new Punto();
+                if (p is null)
+                {
+                    p = new Punto();
+
+                }
                 p.X = int.Parse(txtX.Text);
                 p.Y = int.Parse(txtY.Text);
 
@@ -50,7 +66,7 @@ namespace Ejercicio03.Windows
                 valido = false;
                 errorProvider1.SetError(txtY, "Coord. Y mal ingresada o falta");
             }
-            if(repositorio!.EstaRepetido(x, y))
+            if (repositorio!.EstaRepetido(x, y))
             {
                 valido = false;
                 errorProvider1.SetError(txtY, "Punto existente");
